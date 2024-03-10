@@ -59,7 +59,7 @@ class TestCreateCourier:
         }
 
         response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
-        assert response.status_code == 201 and response.json() == {'ok': True}
+        assert (response.status_code == 201 and response.json() == {'ok': True})
         courier.delete_courier(login, password)
 
     @allure.step('Проверка создания курьера без обязательного поля')
@@ -77,4 +77,5 @@ class TestCreateCourier:
         }
 
         response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
-        assert response.json()['message'] == 'Недостаточно данных для создания учетной записи'
+        assert (response.status_code == 400 and
+                response.json()['message'] == ('Недостаточно данных для создания учетной записи'))
