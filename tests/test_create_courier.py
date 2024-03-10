@@ -64,16 +64,16 @@ class TestCreateCourier:
 
     @allure.step('Проверка создания курьера без обязательного поля')
     @pytest.mark.parametrize("field_one, field_two",
-                             [("login", "firstName"),
-                              ("password", "firstName")
+                             [["login", "firstName"],
+                              ["password", "firstName"]
                               ])
     def test_create_courier_status_code_and_text_true(self, courier, field_one, field_two):
-        field_one = courier.generate_random_string(10)
-        field_two = courier.generate_random_string(10)
+        field_one_data = courier.generate_random_string(10)
+        field_two_data = courier.generate_random_string(10)
 
         payload = {
-            f"{field_one}": field_one,
-            f"{field_two}": field_two
+            f"{field_one}": field_one_data,
+            f"{field_two}": field_two_data
         }
 
         response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
