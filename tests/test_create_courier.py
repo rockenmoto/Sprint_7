@@ -1,21 +1,28 @@
 import allure
 import pytest
 import requests
+from courier import Courier
 
 
 class TestCreateCourier:
     @allure.step('Проверяем успешное создание курьера c обязательными полями')
-    def test_create_courier_with_required_fields_true(self, courier, register_new_courier_and_return_login_password):
-        login = register_new_courier_and_return_login_password[0]
-        password = register_new_courier_and_return_login_password[1]
-        assert len(register_new_courier_and_return_login_password) == 3
+    def test_create_courier_with_required_fields_true(self):
+        courier = Courier()
+        courier_data = courier.register_new_courier_and_return_login_password()
+
+        login = courier_data[0]
+        password = courier_data[1]
+        assert len(courier_data) == 3
         courier.delete_courier(login, password)
 
     @allure.step('Проверяем создание 2 курьеров с одинаковыми данными')
-    def test_create_two_same_couriers_false(self, courier, register_new_courier_and_return_login_password):
-        login = register_new_courier_and_return_login_password[0]
-        password = register_new_courier_and_return_login_password[1]
-        first_name = register_new_courier_and_return_login_password[2]
+    def test_create_two_same_couriers_false(self):
+        courier = Courier()
+        courier_data = courier.register_new_courier_and_return_login_password()
+
+        login = courier_data[0]
+        password = courier_data[1]
+        first_name = courier_data[2]
 
         payload = {
             "login": login,
@@ -29,8 +36,11 @@ class TestCreateCourier:
         courier.delete_courier(login, password)
 
     @allure.step('Проверяем создание курьера с одинаковым логином')
-    def test_create_courier_with_same_login_false(self, courier, register_new_courier_and_return_login_password):
-        login = register_new_courier_and_return_login_password[0]
+    def test_create_courier_with_same_login_false(self):
+        courier = Courier()
+        courier_data = courier.register_new_courier_and_return_login_password()
+
+        login = courier_data[0]
         password = courier.generate_random_string(10)
         first_name = courier.generate_random_string(10)
 
@@ -43,11 +53,13 @@ class TestCreateCourier:
         response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
         assert (response.json()['code'] == 409 and
                 response.json()['message'] == 'Этот логин уже используется. Попробуйте другой.')
-        old_password = register_new_courier_and_return_login_password[1]
+        old_password = courier_data[1]
         courier.delete_courier(login, old_password)
 
     @allure.step('Проверяем код и текст успешного ответа')
-    def test_create_courier_status_code_and_text_true(self, courier):
+    def test_create_courier_status_code_and_text_true(self):
+        courier = Courier()
+
         login = courier.generate_random_string(10)
         password = courier.generate_random_string(10)
         first_name = courier.generate_random_string(10)
@@ -67,7 +79,9 @@ class TestCreateCourier:
                              [["login", "firstName"],
                               ["password", "firstName"]
                               ])
-    def test_create_courier_status_code_and_text_true(self, courier, field_one, field_two):
+    def test_create_courier_status_code_and_text_true(self, field_one, field_two):
+        courier = Courier()
+
         field_one_data = courier.generate_random_string(10)
         field_two_data = courier.generate_random_string(10)
 
