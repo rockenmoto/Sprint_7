@@ -9,7 +9,7 @@ class TestCreateOrder:
 
     @allure.step('Проверка создания заказа с одним или без цвета')
     @pytest.mark.parametrize("color", ["BLACK ", "GREY", ""])
-    def test_create_order_with_one_and_without_color(self, color):
+    def test_create_order_with_one_and_without_color_true(self, color):
         payload = {
             "firstName": "Naruto",
             "lastName": "Uchiha",
@@ -28,7 +28,7 @@ class TestCreateOrder:
         assert response.status_code == 201 and response.json()["track"] != ''
 
     @allure.step('Проверка создания заказа с двумя цветами')
-    def test_create_order_with_two_colors(self):
+    def test_create_order_with_two_colors_true(self):
         payload = {
             "firstName": "Naruto",
             "lastName": "Uchiha",
