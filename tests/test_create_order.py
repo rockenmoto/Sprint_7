@@ -6,8 +6,9 @@ import requests
 
 
 class TestCreateOrder:
+    base_order_url = 'https://qa-scooter.praktikum-services.ru/api/v1/orders'
 
-    @allure.step('Проверка создания заказа с одним или без цвета')
+    @allure.title('Проверка создания заказа с одним или без цвета')
     @pytest.mark.parametrize("color", ["BLACK ", "GREY", ""])
     def test_create_order_with_one_and_without_color_true(self, color):
         payload = {
@@ -23,11 +24,11 @@ class TestCreateOrder:
         }
 
         payload_str = json.dumps(payload)
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/orders',
+        response = requests.post(f'{self.base_order_url}',
                                  data=payload_str)
         assert response.status_code == 201 and response.json()["track"] != ''
 
-    @allure.step('Проверка создания заказа с двумя цветами')
+    @allure.title('Проверка создания заказа с двумя цветами')
     def test_create_order_with_two_colors_true(self):
         payload = {
             "firstName": "Naruto",
@@ -42,6 +43,6 @@ class TestCreateOrder:
         }
 
         payload_str = json.dumps(payload)
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/orders',
+        response = requests.post(f'{self.base_order_url}',
                                  data=payload_str)
         assert response.status_code == 201 and response.json()["track"] != ''

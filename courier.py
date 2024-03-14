@@ -1,12 +1,14 @@
 import string
 import random
+import allure
 
 import requests
 
 
 class Courier:
-    # метод регистрации нового курьера возвращает список из логина и пароля
-    # если регистрация не удалась, возвращает пустой список
+    base_courier_url = 'https://qa-scooter.praktikum-services.ru/api/v1/courier/'
+
+    @allure.step('Регистрация нового курьера с возвращением списка из логина и пароля')
     def register_new_courier_and_return_login_password(self):
         # создаём список, чтобы метод мог его вернуть
         login_pass = []
@@ -24,7 +26,7 @@ class Courier:
         }
 
         # отправляем запрос на регистрацию курьера и сохраняем ответ в переменную response
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+        response = requests.post(self.base_courier_url, data=payload)
 
         # если регистрация прошла успешно (код ответа 201), добавляем в список логин и пароль курьера
         if response.status_code == 201:
@@ -35,21 +37,20 @@ class Courier:
         # возвращаем список
         return login_pass
 
+    @allure.step('Удаление курьера')
     def delete_courier(self, login, password):
         courier_id = self.get_courier_id(login, password)
-        payload_del = {
-            "id": f"{courier_id}"
-        }
+        payload_del = {"id": f"{courier_id}"}
+        requests.delete(f'{self.base_courier_url}{courier_id}',
+                        data=payload_del)
 
-        return requests.delete(f'https://qa-scooter.praktikum-services.ru/api/v1/courier/{courier_id}',
-                               data=payload_del)
-
+    @allure.step('Получение id курьера')
     def get_courier_id(self, login, password):
         payload = {
             "login": login,
             "password": password
         }
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier/login',
+        response = requests.post(f'{self.base_courier_url}login',
                                  data=payload)
         return response.json()['id']
 

@@ -1,25 +1,18 @@
 import allure
 import pytest
 import requests
-from courier import Courier
 
 
 class TestCreateCourier:
-    @allure.step('Проверяем успешное создание курьера c обязательными полями')
-    def test_create_courier_with_required_fields_true(self):
-        courier = Courier()
-        courier_data = courier.register_new_courier_and_return_login_password()
+    login_already_use_error_text = 'Этот логин уже используется. Попробуйте другой.'
+    not_enough_data_error_text = 'Недостаточно данных для создания учетной записи'
 
-        login = courier_data[0]
-        password = courier_data[1]
+    @allure.title('Проверяем успешное создание курьера c обязательными полями')
+    def test_create_courier_with_required_fields_true(self, courier, courier_data):
         assert len(courier_data) == 3
-        courier.delete_courier(login, password)
 
-    @allure.step('Проверяем создание 2 курьеров с одинаковыми данными')
-    def test_create_two_same_couriers_false(self):
-        courier = Courier()
-        courier_data = courier.register_new_courier_and_return_login_password()
-
+    @allure.title('Проверяем создание 2 курьеров с одинаковыми данными')
+    def test_create_two_same_couriers_false(self, courier, courier_data):
         login = courier_data[0]
         password = courier_data[1]
         first_name = courier_data[2]
@@ -30,16 +23,12 @@ class TestCreateCourier:
             "firstName": first_name
         }
 
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+        response = requests.post(courier.base_courier_url, data=payload)
         assert (response.json()['code'] == 409 and
-                response.json()['message'] == 'Этот логин уже используется. Попробуйте другой.')
-        courier.delete_courier(login, password)
+                response.json()['message'] == self.login_already_use_error_text)
 
-    @allure.step('Проверяем создание курьера с одинаковым логином')
-    def test_create_courier_with_same_login_false(self):
-        courier = Courier()
-        courier_data = courier.register_new_courier_and_return_login_password()
-
+    @allure.title('Проверяем создание курьера с одинаковым логином')
+    def test_create_courier_with_same_login_false(self, courier, courier_data):
         login = courier_data[0]
         password = courier.generate_random_string(10)
         first_name = courier.generate_random_string(10)
@@ -50,16 +39,13 @@ class TestCreateCourier:
             "firstName": first_name
         }
 
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+        response = requests.post(courier.base_courier_url, data=payload)
         assert (response.json()['code'] == 409 and
-                response.json()['message'] == 'Этот логин уже используется. Попробуйте другой.')
+                response.json()['message'] == self.login_already_use_error_text)
         old_password = courier_data[1]
-        courier.delete_courier(login, old_password)
 
-    @allure.step('Проверяем код и текст успешного ответа')
-    def test_create_courier_status_code_and_text_true(self):
-        courier = Courier()
-
+    @allure.title('Проверяем код и текст успешного ответа')
+    def test_create_courier_status_code_and_text_true(self, courier):
         login = courier.generate_random_string(10)
         password = courier.generate_random_string(10)
         first_name = courier.generate_random_string(10)
@@ -70,18 +56,15 @@ class TestCreateCourier:
             "firstName": first_name
         }
 
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+        response = requests.post(courier.base_courier_url, data=payload)
         assert (response.status_code == 201 and response.json() == {'ok': True})
-        courier.delete_courier(login, password)
 
-    @allure.step('Проверка создания курьера без обязательного поля')
+    @allure.title('Проверка создания курьера без обязательного поля')
     @pytest.mark.parametrize("field_one, field_two",
                              [["login", "firstName"],
                               ["password", "firstName"]
                               ])
-    def test_create_courier_status_code_and_text_true(self, field_one, field_two):
-        courier = Courier()
-
+    def test_create_courier_status_code_and_text_true(self, courier, field_one, field_two):
         field_one_data = courier.generate_random_string(10)
         field_two_data = courier.generate_random_string(10)
 
@@ -90,6 +73,6 @@ class TestCreateCourier:
             f"{field_two}": field_two_data
         }
 
-        response = requests.post('https://qa-scooter.praktikum-services.ru/api/v1/courier', data=payload)
+        response = requests.post(courier.base_courier_url, data=payload)
         assert (response.status_code == 400 and
-                response.json()['message'] == ('Недостаточно данных для создания учетной записи'))
+                response.json()['message'] == self.not_enough_data_error_text)
