@@ -42,29 +42,17 @@ class TestCreateCourier:
         response = requests.post(courier.base_courier_url, data=payload)
         assert (response.json()['code'] == 409 and
                 response.json()['message'] == self.login_already_use_error_text)
-        old_password = courier_data[1]
 
     @allure.title('Проверяем код и текст успешного ответа')
-    def test_create_courier_status_code_and_text_true(self, courier):
-        login = courier.generate_random_string(10)
-        password = courier.generate_random_string(10)
-        first_name = courier.generate_random_string(10)
-
-        payload = {
-            "login": login,
-            "password": password,
-            "firstName": first_name
-        }
-
-        response = requests.post(courier.base_courier_url, data=payload)
-        assert (response.status_code == 201 and response.json() == {'ok': True})
+    def test_create_courier_status_code_and_text_true(self, courier, courier_data):
+        assert (courier.response.status_code == 201 and courier.response.json() == {'ok': True})
 
     @allure.title('Проверка создания курьера без обязательного поля')
     @pytest.mark.parametrize("field_one, field_two",
                              [["login", "firstName"],
                               ["password", "firstName"]
                               ])
-    def test_create_courier_status_code_and_text_true(self, courier, field_one, field_two):
+    def test_create_courier_without_required_false(self, courier, field_one, field_two):
         field_one_data = courier.generate_random_string(10)
         field_two_data = courier.generate_random_string(10)
 
